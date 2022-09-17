@@ -1,6 +1,6 @@
 function TweetBox ({ text, username }) {
   return (
-    <div>
+    <div className="tweet">
       <h3>{username ? `${username}:` : ""} {text} </h3>
     </div>
   );

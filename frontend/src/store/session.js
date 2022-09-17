@@ -19,14 +19,12 @@ const logoutUser = () => ({
   type: RECEIVE_USER_LOGOUT
 });
 
+export const clearSessionErrors = () => ({
+  type: CLEAR_SESSION_ERRORS
+});
+
 export const signup = user => startSession(user, 'api/users/register');
 export const login = user => startSession(user, 'api/users/login');
-
-export const getCurrentUser = () => async dispatch => {
-  const res = await jwtFetch('/api/users/current');
-  const user = await res.json();
-  return dispatch(receiveCurrentUser(user));
-};
 
 const startSession = (userInfo, route) => async dispatch => {
   try {  
@@ -50,9 +48,11 @@ export const logout = () => dispatch => {
   dispatch(logoutUser());
 };
 
-export const clearSessionErrors = () => ({
-  type: CLEAR_SESSION_ERRORS
-});
+export const getCurrentUser = () => async dispatch => {
+  const res = await jwtFetch('/api/users/current');
+  const user = await res.json();
+  return dispatch(receiveCurrentUser(user));
+};
 
 const nullErrors = null;
 

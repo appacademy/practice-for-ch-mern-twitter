@@ -33,10 +33,10 @@ function NavBar () {
   }
 
   return (
-    <div>
+    <>
       <h1>Chirper</h1>
       { getLinks() }
-    </div>
+    </>
   );
 }
 
