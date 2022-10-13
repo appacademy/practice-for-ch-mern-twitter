@@ -6,16 +6,14 @@ const Tweet = mongoose.model('Tweet');
 const { requireUser } = require('../../config/passport');
 const validateTweetInput = require('../../validation/tweets');
 
-// router.get("/test", (_req, res) => res.json({ msg: "This is the tweets route" }))
-
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
     const tweets = await Tweet.find()
                               .populate("author", "_id, username")
                               .sort({ createdAt: -1 });
     return res.json(tweets);
   }
-  catch(_err) {
+  catch(err) {
     return res.json([]);
   }
 })
@@ -24,11 +22,11 @@ router.get('/user/:userId', async (req, res, next) => {
   let user;
   try {
     user = await User.findById(req.params.userId);
-  } catch(_err) {
-    const err = new Error('User not found');
-    err.statusCode = 404;
-    err.errors = { message: "No user found with that id" };
-    return next(err);
+  } catch(err) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    error.errors = { message: "No user found with that id" };
+    return next(error);
   }
   try {
     const tweets = await Tweet.find({ author: user._id })
@@ -36,7 +34,7 @@ router.get('/user/:userId', async (req, res, next) => {
                               .populate("author", "_id, username");
     return res.json(tweets);
   }
-  catch(_err) {
+  catch(err) {
     return res.json([]);
   }
 })
@@ -47,35 +45,32 @@ router.get('/:id', async (req, res, next) => {
                              .populate("author", "id, username");
     return res.json(tweet);
   }
-  catch(_err) {
-    const err = new Error('Tweet not found');
-    err.statusCode = 404;
-    err.errors = { message: "No tweet found with that id" };
-    return next(err);
+  catch(err) {
+    const error = new Error('Tweet not found');
+    error.statusCode = 404;
+    error.errors = { message: "No tweet found with that id" };
+    return next(error);
   }
 })
 
 // Attach requireUser as a middleware before the route handler to gain access
-  // to req.user (will return error response if no current user)
-// Attach validateTweetInput as a middleware before the route handler
-router.post('/',
-  requireUser,
-  validateTweetInput,
-  async (req, res, next) => {
-    try {
-      const newTweet = new Tweet({
-        text: req.body.text,
-        author: req.user._id
-      });
+// to req.user. (requireUser will return an error response if there is no 
+// current user.) Also attach validateTweetInput as a middleware before the 
+// route handler.
+router.post('/', requireUser, validateTweetInput, async (req, res, next) => {
+  try {
+    const newTweet = new Tweet({
+      text: req.body.text,
+      author: req.user._id
+    });
 
-      let tweet = await newTweet.save();
-      tweet = await tweet.populate('author', '_id, username');
-      return res.json(tweet);
-    }
-    catch(err) {
-      next(err);
-    }
+    let tweet = await newTweet.save();
+    tweet = await tweet.populate('author', '_id, username');
+    return res.json(tweet);
   }
-)
+  catch(err) {
+    next(err);
+  }
+});
 
 module.exports = router;

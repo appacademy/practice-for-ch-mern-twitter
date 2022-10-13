@@ -11,10 +11,9 @@ const validateLoginInput = require('../../validation/login');
 
 const { isProduction } = require('../../config/keys');
 
-// router.get("/test", (_req, res) => res.json({ msg: "This is the users route" }))
-
 // Attach restoreUser as a middleware before the route handler to gain access
-  // to req.user (will NOT return error response if no current user)
+// to req.user. (restoreUser will NOT return an error response if there is no
+// current user.)
 router.get('/current', restoreUser, (req, res) => {
   if (!isProduction) {
     // In development, allow React server to gain access to the CSRF token
@@ -32,43 +31,49 @@ router.get('/current', restoreUser, (req, res) => {
 })
 
 // Attach validateRegisterInput as a middleware before the route handler
-router.post('/register', validateRegisterInput, async (req, res) => {
-  try {
-    // Check to make sure nobody has already registered with a duplicate email
-    const user = await User.findOne({ email: req.body.email });
-    if (user) {
-      // Throw a 400 error if the email address already exists
-      const err = new Error("Validation Error");
-      err.statusCode = 400;
-      err.errors = { email: "A user has already registered with this address" };
-      return next(err);
-    } else {
-      // Otherwise create a new user
-      const newUser = new User({
-        username: req.body.username,
-        email: req.body.email
-      });
-
-      bcrypt.genSalt(10, (err, salt) => {
-        if (err) throw err;
-        bcrypt.hash(req.body.password, salt, async (err, hashedPassword) => {
-          if (err) throw err;
-          try {
-            newUser.hashedPassword = hashedPassword;
-            const user = await newUser.save();
-            // generate the JWT
-            return res.json(await loginUser(user));
-          }
-          catch(err) {
-            next(err);
-          }
-        })
-      });
+router.post('/register', validateRegisterInput, async (req, res, next) => {
+  // Check to make sure nobody has already registered with a duplicate email or
+  // username
+  const user = await User.findOne({
+    $or: [{ email: req.body.email }, { username: req.body.username }]
+  });    
+  
+  if (user) {
+    // Throw a 400 error if the email address or username already exists
+    const err = new Error("Validation Error");
+    err.statusCode = 400;
+    const errors = {};
+    if (user.email === req.body.email) {
+      errors.email = "A user has already registered with this email";
     }
+    if (user.username === req.body.username) {
+      errors.username = "A user has already registered with this username";
+    }
+    err.errors = errors;
+    return next(err);
   }
-  catch(err) {
-    next(err);
-  }
+
+  // Otherwise create a new user
+  const newUser = new User({
+    username: req.body.username,
+    email: req.body.email
+  });
+
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) throw err;
+    bcrypt.hash(req.body.password, salt, async (err, hashedPassword) => {
+      if (err) throw err;
+      try {
+        newUser.hashedPassword = hashedPassword;
+        const user = await newUser.save();
+        // Generate the JWT
+        return res.json(await loginUser(user));
+      }
+      catch(err) {
+        next(err);
+      }
+    })
+  });
 });
 
 // Attach validateLoginInput as a middleware before the route handler
@@ -81,7 +86,7 @@ router.post('/login', validateLoginInput, async (req, res, next) => {
       err.errors = { email: "Invalid credentials" };
       return next(err);
     }
-    // generate the JWT
+    // Generate the JWT
     return res.json(await loginUser(user));
   })(req, res, next);
 });

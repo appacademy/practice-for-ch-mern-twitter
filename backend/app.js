@@ -42,7 +42,7 @@ app.use(
   })
 );
 
-// app.get("/", (_req, res) => res.send("Hello World!!"));
+// app.get("/", (req, res) => res.send("Hello World!!"));
 
 // Attach Express routers
 const tweetsRouter = require('./routes/api/tweets');
@@ -75,7 +75,15 @@ if (isProduction) {
   });
 }
 
-const serverErrorLogger = debug('backend:error')
+// Express custom middleware for catching all unmatched requests and formatting
+// a 404 error to be sent as the response.
+app.use((req, res, next) => {
+  const err = new Error('Not Found');
+  err.statusCode = 404;
+  next(err);
+});
+
+const serverErrorLogger = debug('backend:error');
 // Express custom error handler that will be called whenever a route handler or
 // middleware throws an error or invokes the `next` function with a truthy value
 app.use((err, req, res, next) => {
