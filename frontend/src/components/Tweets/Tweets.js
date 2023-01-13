@@ -18,7 +18,7 @@ function Tweets () {
     <>
       <h2>All Tweets</h2>
       {tweets.map(tweet => (
-        <TweetBox key={tweet._id} text={tweet.text} username={tweet.author.username} />
+        <TweetBox key={tweet._id} tweet={tweet} />
       ))}
     </>
   );

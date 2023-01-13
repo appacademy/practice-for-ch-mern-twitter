@@ -22,7 +22,7 @@ function Profile () {
         {userTweets.map(tweet => (
           <TweetBox
             key={tweet._id}
-            text={tweet.text}
+            tweet={tweet}
           />
         ))}
       </>

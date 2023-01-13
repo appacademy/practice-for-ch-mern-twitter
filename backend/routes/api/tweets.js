@@ -9,7 +9,7 @@ const validateTweetInput = require('../../validation/tweets');
 router.get('/', async (req, res) => {
   try {
     const tweets = await Tweet.find()
-                              .populate("author", "_id, username")
+                              .populate("author", "_id username")
                               .sort({ createdAt: -1 });
     return res.json(tweets);
   }
@@ -31,7 +31,7 @@ router.get('/user/:userId', async (req, res, next) => {
   try {
     const tweets = await Tweet.find({ author: user._id })
                               .sort({ createdAt: -1 })
-                              .populate("author", "_id, username");
+                              .populate("author", "_id username");
     return res.json(tweets);
   }
   catch(err) {
@@ -42,7 +42,7 @@ router.get('/user/:userId', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const tweet = await Tweet.findById(req.params.id)
-                             .populate("author", "id, username");
+                             .populate("author", "_id username");
     return res.json(tweet);
   }
   catch(err) {
@@ -65,7 +65,7 @@ router.post('/', requireUser, validateTweetInput, async (req, res, next) => {
     });
 
     let tweet = await newTweet.save();
-    tweet = await tweet.populate('author', '_id, username');
+    tweet = await tweet.populate('author', '_id username');
     return res.json(tweet);
   }
   catch(err) {

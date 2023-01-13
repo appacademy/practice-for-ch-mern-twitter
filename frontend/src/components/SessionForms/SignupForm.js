@@ -40,7 +40,7 @@ function SignupForm () {
     return e => setState(e.currentTarget.value);
   }
 
-  const usernameSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
     const user = {
       email,
@@ -52,7 +52,7 @@ function SignupForm () {
   }
 
   return (
-    <form className="session-form" onSubmit={usernameSubmit}>
+    <form className="session-form" onSubmit={handleSubmit}>
       <h2>Sign Up Form</h2>
       <div className="errors">{errors?.email}</div>
       <label>
