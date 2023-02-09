@@ -384,6 +384,7 @@ function TweetCompose () {
           value={text}
           onChange={update}
           placeholder="Write your tweet..."
+          required
         />
         <div className="errors">{errors?.text}</div>
         <input type="submit" value="Submit" />

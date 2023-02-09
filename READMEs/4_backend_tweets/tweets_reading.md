@@ -37,7 +37,7 @@ Following a now-familiar pattern, set up a model for your tweets:
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const tweetSchema = Schema({
+const tweetSchema = new Schema({
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User'

@@ -22,7 +22,7 @@ Now think ahead to the information you will need to require from a user and set
 up your schema:
 
 ```js
-const userSchema = Schema({
+const userSchema = new Schema({
   username: {
     type: String,
     required: true
